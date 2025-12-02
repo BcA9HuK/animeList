@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Библиотека аниме BcA9HuK</title>
+  <link rel="icon" href="favicon.png" type="image/png" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="top">
+    <h1>Библиотека аниме BcA9HuK</h1>
+    <div class="controls">
+      <input id="q" type="search" placeholder="Поиск по названию..." />
+      <select id="sort">
+        <option value="rate_desc">Оценка ↓</option>
+        <option value="rate_asc">Оценка ↑</option>
+        <option value="name_az">Название A→Z</option>
+        <option value="name_za">Название Z→A</option>
+        <option value="date">Новые → старые</option>
+        <option value="date_old" selected>Старые → новые</option>
+      </select>
+      <button id="reload">Обновить</button>
+    </div>
+  </header>
+
+  <main>
+    <div id="stats" class="stats">Загрузка...</div>
+    <div id="grid" class="grid"></div>
+    <div id="empty" class="empty" hidden>Ничего не найдено.</div>
+  </main>
+
+  <template id="card-tpl">
+    <article class="card">
+      <img class="cover" alt="">
+      <div class="meta">
+        <div class="title"></div>
+        <div class="sub">
+          <span class="type"></span>
+          <span class="episodes"></span>
+          <span class="year"></span>
+        </div>
+        <div class="score">Оценка: —</div>
+        <div class="genres"></div>
+      </div>
+    </article>
+  </template>
+
+  <script src="main.js"></script>
+</body>
+</html>
