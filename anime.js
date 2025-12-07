@@ -1,6 +1,17 @@
 const params = new URLSearchParams(location.search);
 const id = params.get("id");
 const user = "BcA9HuK";
+const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQZIa3uuVG-3ZjUWMPJLhnZ6xf0fMs0TabxYE3QRe2Thksz5ILHDv31A3qqJLIl4bZyYKYz5JJZfeK2/pub?gid=788506476&single=true&output=csv";
+let SHEET_CACHE = null; // { ready: Promise<Map> }
+
+/* --- тема --- */
+function applyTheme(theme) {
+  const isLight = theme === "light";
+  document.documentElement.classList.toggle("theme-light", isLight);
+}
+
+// применяем сразу сохранённую тему, чтобы не мигало
+applyTheme(localStorage.getItem("theme") === "light" ? "light" : "dark");
 
 function isShikiPlaceholderPath(pathOrUrl) {
   return typeof pathOrUrl === "string" && pathOrUrl.includes("/assets/globals/missing_original");
@@ -77,12 +88,151 @@ async function getGraphqlAnimeInfo(animeId) {
   };
 }
 
+// Простой CSV-парсер с поддержкой кавычек
+function parseCsv(text) {
+  const rows = [];
+  let row = [];
+  let cell = "";
+  let inQuotes = false;
+
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    const next = text[i + 1];
+
+    if (ch === '"' ) {
+      if (inQuotes && next === '"') {
+        cell += '"'; // экранированная кавычка
+        i++; // пропускаем двойную
+      } else {
+        inQuotes = !inQuotes;
+      }
+      continue;
+    }
+
+    if (ch === "," && !inQuotes) {
+      row.push(cell);
+      cell = "";
+      continue;
+    }
+
+    if ((ch === "\n" || ch === "\r") && !inQuotes) {
+      // завершаем строку
+      if (cell.length || row.length) {
+        row.push(cell);
+        rows.push(row);
+        row = [];
+        cell = "";
+      }
+      continue;
+    }
+
+    cell += ch;
+  }
+  // последний хвост
+  if (cell.length || row.length) {
+    row.push(cell);
+    rows.push(row);
+  }
+  return rows;
+}
+
+function normalizeHeader(cell) {
+  return cell.replace(/\s+/g, " ").trim().toLowerCase();
+}
+
+async function loadSheetMap() {
+  if (SHEET_CACHE?.ready) return SHEET_CACHE.ready;
+  const ready = (async () => {
+    try {
+      const res = await fetch(`${SHEET_CSV_URL}&cachebust=${Math.floor(Date.now() / 60000)}`);
+      const text = await res.text();
+      const rows = parseCsv(text);
+      if (!rows.length) return new Map();
+
+      // ищем строку заголовков
+      let header = null;
+      let headerIdx = -1;
+      for (let i = 0; i < rows.length; i++) {
+        const candidate = rows[i].map(normalizeHeader);
+        if (candidate.some(c => c.includes("id"))) {
+          header = candidate;
+          headerIdx = i;
+          break;
+        }
+      }
+      if (!header) return new Map();
+
+      const idIdx = header.findIndex(c => c.includes("id"));
+      const rewatchIdx = header.findIndex(c => c.includes("пересмотр"));
+      const dateIdx = header.findIndex(c => c.includes("дата"));
+      const voiceIdx = header.findIndex(c => c.includes("озвучк"));
+      const zakomIdx = header.findIndex(c => c.includes("коммент"));
+
+      const map = new Map();
+      for (let i = headerIdx + 1; i < rows.length; i++) {
+        const row = rows[i];
+        if (!row || !row.length) continue;
+        const rawId = (row[idIdx] || "").trim();
+        if (!rawId || rawId === "-") continue;
+        const numId = Number(rawId);
+        if (!Number.isFinite(numId)) continue;
+
+        const norm = (v) => {
+          if (typeof v !== "string") return null;
+          const t = v.trim();
+          return t ? t : null;
+        };
+
+        const rewatch = norm(row[rewatchIdx]);
+        const date = norm(row[dateIdx]);
+        const voice = norm(row[voiceIdx]);
+        const zakomRaw = norm(row[zakomIdx]);
+        const hasZakom = zakomRaw ? /с\s*заком/i.test(zakomRaw) : false;
+        // Онгоинг: ищем слово по всей строке (в т.ч. "Зима 24 (онгоинг)")
+        const hasOngoing = row.some(cell => /онгоинг/i.test(cell || ""));
+
+        map.set(String(numId), {
+          rewatch,
+          date,
+          voice,
+          zakom: hasZakom,
+          ongoing: hasOngoing
+        });
+      }
+      return map;
+    } catch (e) {
+      console.warn("Failed to load custom sheet", e);
+      return new Map();
+    }
+  })();
+  SHEET_CACHE = { ready };
+  return ready;
+}
+
+async function getCustomData(shikiId) {
+  const map = await loadSheetMap();
+  return map.get(String(shikiId)) || null;
+}
+
+// Поддержка больших списков: пагинируем по 500 элементов, пока не найдём запись
 async function loadRate(id) {
+  const LIMIT = 500;
+  let page = 1;
+  while (true) {
     const res = await fetch(
-        `https://shikimori.one/api/users/${user}/anime_rates?limit=5000`
+      `https://shikimori.one/api/users/${user}/anime_rates?limit=${LIMIT}&page=${page}`
     );
+    if (!res.ok) {
+      console.warn("Failed to load rates page", page, res.status);
+      break;
+    }
     const rates = await res.json();
-    return rates.find(r => r.anime.id == id);
+    const found = rates.find(r => r.anime.id == id);
+    if (found) return found;
+    if (rates.length < LIMIT) break; // достигли конца
+    page++;
+  }
+  return null;
 }
 
 async function loadAnime() {
@@ -124,8 +274,23 @@ async function loadAnime() {
       videos = anime.videos;
     }
 
-    const rate = await loadRate(id);
+    const [rate, custom] = await Promise.all([loadRate(id), getCustomData(id)]);
     const userScore = rate ? rate.score : "—";
+    let customBlocks = "";
+    if (custom) {
+      const tags = [];
+      if (custom.rewatch) tags.push(`<span class="tag">Смотрел ${custom.rewatch} раз</span>`);
+      if (custom.date) tags.push(`<span class="tag">Дата: ${custom.date}</span>`);
+      if (custom.voice) tags.push(`<span class="tag">Озвучка: ${custom.voice}</span>`);
+      if (custom.zakom) tags.push(`<span class="tag zakom">С Заком</span>`);
+      if (custom.ongoing) tags.push(`<span class="tag ongoing">В онгоинге</span>`);
+      if (tags.length) {
+        customBlocks = `
+          <h3>Мои заметки</h3>
+          <div class="tags">${tags.join("")}</div>
+        `;
+      }
+    }
 
     // год
     const year = anime.aired_on ? anime.aired_on.slice(0, 4) : "—";
@@ -198,6 +363,8 @@ async function loadAnime() {
           <span class="badge">${anime.episodes} эп.</span>
         </div>
 
+        ${customBlocks}
+
         <h3>Жанры</h3>
         <div class="tags">${genres}</div>
 
@@ -261,11 +428,16 @@ async function loadAnime() {
     });
 
     // Закрытие по Escape
-    document.addEventListener("keydown", (e) => {
+    // Не копим обработчики при повторных инициализациях
+    if (window.__animeEscHandler) {
+      document.removeEventListener("keydown", window.__animeEscHandler);
+    }
+    window.__animeEscHandler = (e) => {
       if (e.key === "Escape" && modal.style.display === "flex") {
         closeVideoModal();
       }
-    });
+    };
+    document.addEventListener("keydown", window.__animeEscHandler);
 }
 
 loadAnime();

@@ -20,6 +20,7 @@
         <option value="date">Новые → старые</option>
         <option value="date_old" selected>Старые → новые</option>
       </select>
+      <button id="theme-toggle" class="theme-toggle">Светлая тема</button>
       <button id="reload">Обновить</button>
     </div>
   </header>
@@ -32,7 +33,7 @@
 
   <template id="card-tpl">
     <article class="card">
-      <img class="cover" alt="">
+      <img class="cover" alt="" loading="lazy">
       <div class="meta">
         <div class="title"></div>
         <div class="sub">

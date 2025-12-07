@@ -1,10 +1,40 @@
 /* ---------- Variables ---------- */
 :root {
-  --bg: #171717;
+  --bg-start: #141414;
+  --bg-end: #1b1b1b;
+  --surface: #0d0d0d;
   --card: #242426;
+  --card-shadow: 0 6px 18px rgba(0, 0, 0, 0.6);
+  --chip: #222;
+  --chip-alt: #1a2639;
+  --chip-alt-border: #35517a;
   --muted: #bfc3c8;
+  --muted-strong: #ddd;
+  --text: #eee;
+  --text-strong: #fff;
   --accent: #76b3ff;
   --glass: rgba(255, 255, 255, 0.03);
+  --shadow-strong: 0 6px 18px rgba(0, 0, 0, 0.6);
+  --border-soft: rgba(255, 255, 255, 0.05);
+}
+
+.theme-light {
+  --bg-start: #f9f9f9;
+  --bg-end: #f9f9f9;
+  --surface: #ffffff;
+  --card: #ffffff;
+  --card-shadow: 0 12px 26px rgba(0, 0, 0, 0.12);
+  --chip: #f0f2f5;
+  --chip-alt: #e7edfb;
+  --chip-alt-border: #bed0ff;
+  --muted: #4c4f5a;
+  --muted-strong: #181a20;
+  --text: #13151b;
+  --text-strong: #0a0b10;
+  --accent: #2b73ff;
+  --glass: rgba(0, 0, 0, 0.03);
+  --shadow-strong: 0 12px 28px rgba(0, 0, 0, 0.14);
+  --border-soft: rgba(0, 0, 0, 0.08);
 }
 
 /* ---------- Base ---------- */
@@ -14,17 +44,29 @@
 
 html,
 body {
-  height: 100%;
+  min-height: 100%;
 }
 
 body {
   margin: 0;
   padding: 24px;
+  padding-bottom: 80px;
+  min-height: 100vh;
   font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-  background: linear-gradient(180deg, #141414 0%, #1b1b1b 100%);
-  color: #eee;
+  background: linear-gradient(180deg, var(--bg-start) 0%, var(--bg-end) 100%);
+  color: var(--text);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+a:not(.link),
+a:visited:not(.link) {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+a:not(.link):hover {
+  text-decoration: underline;
 }
 
 /* ---------- Top bar ---------- */
@@ -38,7 +80,7 @@ body {
 .top h1 {
   margin: 0;
   font-size: 20px;
-  color: #fff;
+  color: var(--text-strong);
   text-shadow: 0 1px 0 rgba(0, 0, 0, 0.6);
 }
 
@@ -47,6 +89,21 @@ body {
   display: flex;
   gap: 8px;
   align-items: center;
+}
+
+.theme-toggle {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--chip-alt-border);
+  background: var(--chip);
+  color: var(--text-strong);
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s, background 0.2s;
+}
+
+.theme-toggle:hover {
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 .controls input[type="search"],
@@ -82,10 +139,11 @@ body {
 
 /* ---------- Card ---------- */
 .card {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(0, 0, 0, 0.12));
+  background: var(--card);
   border-radius: 10px;
   overflow: hidden;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.6);
+  box-shadow: var(--card-shadow);
+  border: 1px solid var(--border-soft);
   cursor: pointer;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
   display: flex;
@@ -96,6 +154,12 @@ body {
 .card:hover {
   transform: translateY(-6px);
   box-shadow: 0 10px 28px rgba(0, 0, 0, 0.7);
+}
+
+.theme-light .card {
+  background: var(--card);
+  box-shadow: var(--card-shadow);
+  border: 1px solid var(--border-soft);
 }
 
 .card .cover {
@@ -117,7 +181,7 @@ body {
   font-weight: 600;
   font-size: 14px;
   line-height: 1.35;
-  color: #fff;
+  color: var(--text-strong);
   display: -webkit-box;
   -webkit-line-clamp: 3;
   line-clamp: 3;
@@ -167,6 +231,7 @@ body {
 
   .grid {
     grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    row-gap: 18px;
   }
 
   .card .cover {

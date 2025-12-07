@@ -9,8 +9,30 @@ const qInput = document.getElementById("q");
 const sortSel = document.getElementById("sort");
 const reloadBtn = document.getElementById("reload");
 const empty = document.getElementById("empty");
+const themeBtn = document.getElementById("theme-toggle");
 
 let ALL = []; // массив всех записей (rates)
+
+/* --- тема --- */
+function applyTheme(theme) {
+  const isLight = theme === "light";
+  document.documentElement.classList.toggle("theme-light", isLight);
+  if (themeBtn) {
+    themeBtn.textContent = isLight ? "Тёмная тема" : "Светлая тема";
+  }
+}
+
+function initTheme() {
+  const saved = localStorage.getItem("theme") === "light" ? "light" : "dark";
+  applyTheme(saved);
+  if (themeBtn) {
+    themeBtn.addEventListener("click", () => {
+      const next = document.documentElement.classList.contains("theme-light") ? "dark" : "light";
+      localStorage.setItem("theme", next);
+      applyTheme(next);
+    });
+  }
+}
 
 /* --- загрузка всех страниц списка completed --- */
 async function loadAllRates(status = "completed") {
@@ -148,6 +170,7 @@ function filterAndRender() {
 
 /* --- инициализация --- */
 async function init() {
+  initTheme();
   try {
     reloadBtn.disabled = true;
     ALL = await loadAllRates("completed");
