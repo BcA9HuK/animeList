@@ -279,7 +279,7 @@ async function loadAnime() {
     let customBlocks = "";
     if (custom) {
       const tags = [];
-      if (custom.rewatch) tags.push(`<span class="tag">Смотрел ${custom.rewatch} раз</span>`);
+      if (custom.rewatch) tags.push(`<span class="tag">Смотрел ${custom.rewatch} раз(а)</span>`);
       if (custom.date) tags.push(`<span class="tag">Дата: ${custom.date}</span>`);
       if (custom.voice) tags.push(`<span class="tag">Озвучка: ${custom.voice}</span>`);
       if (custom.zakom) tags.push(`<span class="tag zakom">С Заком</span>`);
@@ -441,3 +441,4 @@ async function loadAnime() {
 }
 
 loadAnime();
+
