@@ -72,7 +72,52 @@ function renderCard(rate) {
   const score = node.querySelector(".score");
   const genres = node.querySelector(".genres");
 
-  // Выбор картинки: сначала preview (если есть), иначе original, иначе запасной
+  // Ручные исправления постеров: ключ — ID аниме на Shikimori
+  const POSTER_OVERRIDES = {
+    // Пример: 5114: "https://shikimori.one/system/animes/original/5114.jpg"
+    59986: "https://shikimori.one/uploads/poster/animes/59986/main-f58f92d4adc6e336d2cce149dcaaedac.webp",
+    56907: "https://shikimori.one/uploads/poster/animes/56907/d440571f2132e74a76781ca457187c79.jpeg",
+    60316: "https://shikimori.one/uploads/poster/animes/60316/main-4559dac7743c844ae22693303dad9138.webp",
+    48962: "https://shikimori.one/uploads/poster/animes/48962/main-70c6648952fb23b1014a6888b5965c8f.webp",
+    56774: "https://shikimori.one/uploads/poster/animes/56774/main-126444114f0f3478ae877707750fccd2.webp",
+    55791: "https://shikimori.one/uploads/poster/animes/55791/main-bab756dc3eebe56bcc3aea2107cb41ec.webp",
+    59177: "https://shikimori.one/uploads/poster/animes/59177/main-cd1cb38425ef4df60290cbbc830ab9df.webp",
+    59207: "https://shikimori.one/uploads/poster/animes/59207/main-7e64f4351625d3bfc7958d7d6f72a5af.webp",
+    59424: "https://shikimori.one/uploads/poster/animes/59424/d2c95cfc56e448c1bd68440c06fb54fe.jpeg",
+    59205: "https://shikimori.one/uploads/poster/animes/59205/main-f8ec893f79ecfba886870acdc377dbbd.webp",
+    60732: "https://shikimori.one/uploads/poster/animes/60732/main-05f8937b01b938b1f14ed41bc2c469f6.webp",
+    59459: "https://shikimori.one/uploads/poster/animes/59459/main-475fc0a1a4aeeb790a2642c82750bd6c.webp",
+    59421: "https://shikimori.one/uploads/poster/animes/59421/main-562853c0a2b44d0a4fed405e1ac119b7.webp",
+    59845: "https://shikimori.one/uploads/poster/animes/59845/main-158d7102f71b7cedd6a23c22265dafa9.webp",
+    59161: "https://shikimori.one/uploads/poster/animes/59161/main-10955fa4fb5153f7b5482a3a353cd8a1.webp",
+    59130: "https://shikimori.one/uploads/poster/animes/59130/main-f2eb412e9b0bcacc9ebccf2bdebe1139.webp",
+    59689: "https://shikimori.one/uploads/poster/animes/59689/main-ed4053f1f36c22a2dc7607a3864a0848.webp",
+    59730: "https://shikimori.one/uploads/poster/animes/59730/main-b891bd01c179cf0d99c59176cf7638b9.webp",
+    59935: "https://shikimori.one/uploads/poster/animes/59935/main-134a34f5bac2cbc357a78d68dd36de7b.webp",
+    60146: "https://shikimori.one/uploads/poster/animes/60146/main-345827ea2f19b6a6086e3cef23d15e10.webp",
+    52709: "https://shikimori.one/uploads/poster/animes/52709/main-bd54103165cb7ce8486939e8328a236e.webp",
+    59452: "https://shikimori.one/uploads/poster/animes/59452/main-c870f2442e42aa5f14ce870441d15028.webp",
+    60154: "https://shikimori.one/uploads/poster/animes/60154/main-10c374e2059ff9a765ef881ab4455192.webp",
+    60140: "https://shikimori.one/uploads/poster/animes/60140/main-da656b440471b8bbd0bd44f333137b22.webp",
+    59466: "https://shikimori.one/uploads/poster/animes/59466/main-abfce312483cae752e75ed2255b3237a.webp",
+    60157: "https://shikimori.one/uploads/poster/animes/60157/main-3c439cb413d8282b49de36b000a11db0.webp",
+    59833: "https://shikimori.one/uploads/poster/animes/59833/main-8d1635d8192e7bc53cf474c3152efe75.webp",
+    60057: "https://shikimori.one/uploads/poster/animes/60057/main-1ccd7d70a5a353a53f2b12e8ea4e5046.webp",
+    59425: "https://shikimori.one/uploads/poster/animes/59425/main-13fb5d686fa8c99e0b589a38fa10e9e0.webp",
+    59989: "https://shikimori.one/uploads/poster/animes/59989/main-3dfe610aaa59cd0f41bcda9ff7f24d2a.webp",
+    59135: "https://shikimori.one/uploads/poster/animes/59135/main-f60d52781936b927ee548c727fbfd9b2.webp",
+    59361: "https://shikimori.one/uploads/poster/animes/59361/main-f330fa9f3cae8798a9b6693867c0ef14.webp",
+    59142: "https://shikimori.one/uploads/poster/animes/59142/main-812b26da142e14eab7216dcee4d8aedb.webp",
+    59265: "https://shikimori.one/uploads/poster/animes/59265/main-0e95eed8869ad78613cbcc7ff538ea17.webp",
+    59561: "https://shikimori.one/uploads/poster/animes/59561/main-fd8ec565477ffccd6dbcbbfb06f206d0.webp",
+    59144: "https://shikimori.one/uploads/poster/animes/59144/main-66e5d6594fbd1e9eb61746f7bc7fc59c.webp",
+    54284: "https://shikimori.one/uploads/poster/animes/54284/main-e07db78ddc9e6b6d5c369bf258671dda.webp",
+    52962: "https://shikimori.one/uploads/poster/animes/52962/main-ece812da3f560cc3d1ccf0d2ebaaaa3d.webp",
+    4224: "https://shikimori.one/uploads/poster/animes/4224/main-52f8a82ffd8cb7d6ec1a7596435138c1.webp"
+  };
+
+  // Выбор картинки: сначала ручной override, потом preview, потом original, иначе запасной
+  const override = POSTER_OVERRIDES[anime.id];
   const imgPreview = anime.image?.preview ? `https://shikimori.one${anime.image.preview}` : null;
   const imgOrig = anime.image?.original ? `https://shikimori.one${anime.image.original}` : null;
 
@@ -84,7 +129,7 @@ function renderCard(rate) {
      </svg>`
   )}`;
 
-  img.src = imgPreview || imgOrig || placeholder;
+  img.src = override || imgPreview || imgOrig || placeholder;
   img.alt = anime.russian || anime.name || "Anime";
 
   title.textContent = anime.russian || anime.name || "—";
@@ -96,11 +141,15 @@ function renderCard(rate) {
 
   genres.textContent = anime.genres?.map(g => g.name).join(", ") || "";
 
-  el.addEventListener("click", () => {
-    location.href = `anime.html?id=${anime.id}`;
-  });
+  // Оборачиваем карточку в ссылку, чтобы SКМ/ctrl+click открывали в новой вкладке
+  const link = document.createElement("a");
+  link.href = `anime.html?id=${anime.id}`;
+  link.className = "card-link";
+  link.style.textDecoration = "none";
+  link.style.display = "block";
+  link.appendChild(el);
 
-  return node;
+  return link;
 }
 
 /* --- рендер всех карточек с фильтрами --- */

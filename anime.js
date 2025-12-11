@@ -236,11 +236,25 @@ async function loadRate(id) {
 }
 
 async function loadAnime() {
+    // Ручные постеры для страницы тайтла (id -> URL), если нужно принудительно заменить
+    const POSTER_OVERRIDES = {
+      // Пример: 59986: "https://shikimori.one/uploads/poster/animes/59986/main-f58f92d4adc6e336d2cce149dcaaedac.webp",
+      56907: "https://shikimori.one/uploads/poster/animes/56907/d440571f2132e74a76781ca457187c79.jpeg",
+      48962: "https://shikimori.one/uploads/poster/animes/48962/main-70c6648952fb23b1014a6888b5965c8f.webp",
+      56774: "https://shikimori.one/uploads/poster/animes/56774/main-126444114f0f3478ae877707750fccd2.webp",
+      55791: "https://shikimori.one/uploads/poster/animes/55791/main-bab756dc3eebe56bcc3aea2107cb41ec.webp",
+      59424: "https://shikimori.one/uploads/poster/animes/59424/d2c95cfc56e448c1bd68440c06fb54fe.jpeg",
+      52709: "https://shikimori.one/uploads/poster/animes/52709/main-bd54103165cb7ce8486939e8328a236e.webp",
+      54284: "https://shikimori.one/uploads/poster/animes/54284/main-e07db78ddc9e6b6d5c369bf258671dda.webp",
+      52962: "https://shikimori.one/uploads/poster/animes/52962/main-ece812da3f560cc3d1ccf0d2ebaaaa3d.webp",
+      4224: "https://shikimori.one/uploads/poster/animes/4224/main-52f8a82ffd8cb7d6ec1a7596435138c1.webp"
+    };
+
     const res = await fetch(`https://shikimori.one/api/animes/${id}`);
     const anime = await res.json();
 
     // базовые данные из REST
-    let posterUrl = anime.image?.original ? `https://shikimori.one${anime.image.original}` : null;
+    let posterUrl = POSTER_OVERRIDES[anime.id] || (anime.image?.original ? `https://shikimori.one${anime.image.original}` : null);
     let restGenres = Array.isArray(anime.genres) ? anime.genres : [];
     let restStudios = Array.isArray(anime.studios) ? anime.studios : [];
 

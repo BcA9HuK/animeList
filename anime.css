@@ -12,6 +12,7 @@ body {
   max-width: 1000px;
   margin: 40px auto;
   display: flex;
+  align-items: flex-start;
   gap: 40px;
   padding: 20px;
   position: relative;
@@ -23,18 +24,27 @@ body {
   align-items: center;
   justify-content: center;
   border-radius: 16px;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .poster {
   position: relative;
   z-index: 1;
   border-radius: 16px;
-  overflow: hidden;
+  overflow: visible;
+}
+
+@media (min-width: 769px) {
+  .poster {
+    padding-top: 65px;
+  }
 }
 
 .poster img {
-  width: 300px;
+  width: auto;
+  max-width: 320px;
+  max-height: 720px;
+  object-fit: contain;
   border-radius: 16px;
   box-shadow: 
     0 0 20px rgba(255, 255, 255, 0.15),
@@ -388,12 +398,12 @@ a.back:hover {
   .poster-wrapper {
     width: 100%;
     position: relative;
-    min-height: 400px;
+    min-height: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 20px;
-    overflow: hidden;
+    margin-bottom: 12px;
+    overflow: visible;
   }
 
   .poster {
@@ -405,8 +415,10 @@ a.back:hover {
   }
 
   .poster img {
-    width: 100% !important;
-    max-width: 280px !important;
+    width: auto !important;
+    max-width: 100% !important;
+    max-height: 520px !important;
+    object-fit: contain !important;
     position: relative;
     z-index: 1;
     box-shadow: 

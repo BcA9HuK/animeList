@@ -137,6 +137,13 @@ a:not(.link):hover {
   gap: 16px;
 }
 
+/* ссылка-обертка карточки */
+.card-link {
+  display: block;
+  height: 100%;
+  color: inherit;
+}
+
 /* ---------- Card ---------- */
 .card {
   background: var(--card);
@@ -186,6 +193,8 @@ a:not(.link):hover {
   -webkit-line-clamp: 3;
   line-clamp: 3;
   -webkit-box-orient: vertical;
+   /* резервируем высоту под 3 строки, чтобы карточки были ровные */
+  min-height: calc(1.35em * 3);
   overflow: hidden;
   word-break: break-word;
 }
