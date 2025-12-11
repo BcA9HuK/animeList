@@ -34,12 +34,6 @@ body {
   overflow: visible;
 }
 
-@media (min-width: 769px) {
-  .poster {
-    padding-top: 65px;
-  }
-}
-
 .poster img {
   width: auto;
   max-width: 320px;
@@ -54,6 +48,15 @@ body {
   position: relative;
   z-index: 1;
   background: #fff;
+}
+
+@media (min-width: 769px) {
+  .poster-wrapper {
+    padding-top: 65px;
+  }
+  .poster {
+    margin-top: 0;
+  }
 }
 
 

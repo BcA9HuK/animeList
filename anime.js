@@ -361,8 +361,11 @@ async function loadAnime() {
       <div class="info">
         <div class="top-actions">
           <a class="back back-in-actions" href="index.html">← Назад</a>
-          <a class="link" href="https://shikimori.one/animes/${anime.id}" target="_blank">
+          <a class="link" href="https://shikimori.one/animes/${anime.id}" target="_blank" rel="noopener">
             Открыть на Shikimori
+          </a>
+          <a class="link" href="https://reyohoho-gitlab.vercel.app/#shiki${anime.id}" target="_blank" rel="noopener">
+            ▶ Смотреть на Reyohoho
           </a>
         </div>
 
