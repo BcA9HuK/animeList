@@ -1,7 +1,7 @@
 body {
   margin: 0;
   font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  background: var(--surface, #0d0d0d);
+  background: var(--surface, #0f0f14);
   color: var(--text-strong, #fff);
   position: relative;
   overflow-x: hidden;
@@ -62,14 +62,14 @@ body {
 
 a.back,
 a.back:visited {
-  color: #ff4b4b;
+  color: #bb86fc;
   text-decoration: none;
   font-size: 18px;
   transition: color 0.2s;
 }
 
 a.back:hover {
-  color: #ff6f6f;
+  color: #c99aff;
   text-decoration: none;
 }
 
@@ -83,7 +83,7 @@ a.back:hover {
   backdrop-filter: blur(4px);
   padding: 8px 12px;
   border-radius: 0 0 8px 8px;
-  color: #ff4b4b;
+  color: #bb86fc;
   text-decoration: none;
   font-size: 16px;
   transition: background 0.2s, color 0.2s;
@@ -92,7 +92,7 @@ a.back:hover {
 
 .back-on-poster:hover {
   background: rgba(0, 0, 0, 0.8);
-  color: #ff6f6f;
+  color: #c99aff;
 }
 
 .back-in-actions {
@@ -196,7 +196,7 @@ a.back:hover {
 }
 
 .video-button:hover .video-play-icon {
-  background: rgba(255, 75, 75, 0.9);
+  background: rgba(187, 134, 252, 0.9);
 }
 
 .video-button-title {
@@ -207,7 +207,10 @@ a.back:hover {
 
 /* Light theme tweaks */
 .theme-light .poster img {
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  box-shadow: 
+    0 4px 16px rgba(0, 0, 0, 0.15),
+    0 8px 32px rgba(0, 0, 0, 0.2),
+    0 16px 48px rgba(0, 0, 0, 0.12);
 }
 
 .theme-light .back-on-poster {
@@ -333,7 +336,7 @@ a.back:hover {
 
 .link {
   display: inline-block;
-  background: #ff4b4b;
+  background: #bb86fc;
   padding: 8px 16px;
   border-radius: 10px;
   color: #fff;
@@ -343,7 +346,7 @@ a.back:hover {
 }
 
 .link:hover {
-  background: #ff6565;
+  background: #c99aff;
 }
 
 .tags {
@@ -407,6 +410,10 @@ a.back:hover {
     justify-content: center;
     margin-bottom: 12px;
     overflow: visible;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
   }
 
   .poster {
@@ -415,6 +422,10 @@ a.back:hover {
     display: flex !important;
     justify-content: center !important;
     align-items: center !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
   }
 
   .poster img {
@@ -424,11 +435,19 @@ a.back:hover {
     object-fit: contain !important;
     position: relative;
     z-index: 1;
+    background: transparent !important;
     box-shadow: 
       0 0 20px rgba(255, 255, 255, 0.15),
       0 0 40px rgba(255, 255, 255, 0.1),
       0 0 60px rgba(255, 255, 255, 0.05),
       0 8px 32px rgba(0, 0, 0, 0.4);
+  }
+  
+  .theme-light .poster img {
+    box-shadow: 
+      0 4px 16px rgba(0, 0, 0, 0.18),
+      0 8px 32px rgba(0, 0, 0, 0.25),
+      0 16px 48px rgba(0, 0, 0, 0.15) !important;
   }
 
   .back-in-actions {
@@ -451,11 +470,11 @@ a.back:hover {
     font-size: 18px;
     display: inline-block;
     line-height: 1;
-    color: #ff4b4b;
+    color: #bb86fc;
   }
   
   .back-on-poster:hover::before {
-    color: #ff6f6f;
+    color: #c99aff;
   }
 
   .info h1 {

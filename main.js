@@ -1,6 +1,8 @@
 // Настройка — поменяй ник при необходимости
-const USERNAME = "BcA9HuK";
+const NICKNAME = "BcA9HuK"; //введите свой ник с Шикимори
+const USERNAME = NICKNAME; // для совместимости с API
 const LIMIT = 500; // Shikimori max per page
+const USER_AGENT = "AnimeLibrary/1.0"; // User-Agent для Shikimori API (требуется по документации)
 
 const grid = document.getElementById("grid");
 const stats = document.getElementById("stats");
@@ -42,7 +44,11 @@ async function loadAllRates(status = "completed") {
   stats.textContent = "Подгружаю список с Shikimori...";
   while (true) {
     const url = `https://shikimori.one/api/users/${USERNAME}/anime_rates?status=${status}&limit=${LIMIT}&page=${page}`;
-    const res = await fetch(url);
+    const res = await fetch(url, {
+      headers: {
+        "User-Agent": USER_AGENT
+      }
+    });
     if (!res.ok) throw new Error(`Ошибка Shikimori: ${res.status}`);
     const data = await res.json();
 
@@ -70,11 +76,11 @@ function renderCard(rate) {
   const episodes = node.querySelector(".episodes");
   const yearEl = node.querySelector(".year");
   const score = node.querySelector(".score");
+  const rating = node.querySelector(".rating");
   const genres = node.querySelector(".genres");
 
   // Ручные исправления постеров: ключ — ID аниме на Shikimori
   const POSTER_OVERRIDES = {
-    // Пример: 5114: "https://shikimori.one/system/animes/original/5114.jpg"
     59986: "https://shikimori.one/uploads/poster/animes/59986/main-f58f92d4adc6e336d2cce149dcaaedac.webp",
     56907: "https://shikimori.one/uploads/poster/animes/56907/d440571f2132e74a76781ca457187c79.jpeg",
     60316: "https://shikimori.one/uploads/poster/animes/60316/main-4559dac7743c844ae22693303dad9138.webp",
@@ -138,10 +144,11 @@ function renderCard(rate) {
   const year = anime.aired_on ? anime.aired_on.slice(0, 4) : "";
   yearEl.textContent = year;
   score.textContent = rate.score ? `Оценка: ${rate.score}` : "Оценка: —";
+  rating.textContent = anime.score ? `⭐ ${anime.score}` : "⭐ —";
 
   genres.textContent = anime.genres?.map(g => g.name).join(", ") || "";
 
-  // Оборачиваем карточку в ссылку, чтобы SКМ/ctrl+click открывали в новой вкладке
+  // Оборачиваем карточку в ссылку, чтобы СКМ/ctrl+click открывали в новой вкладке
   const link = document.createElement("a");
   link.href = `anime.html?id=${anime.id}`;
   link.className = "card-link";
@@ -244,6 +251,13 @@ function debounce(fn, time = 150) {
     clearTimeout(t);
     t = setTimeout(() => fn(...a), time);
   };
+}
+
+/* вставка никнейма в заголовки */
+document.title = `Библиотека аниме ${NICKNAME}`;
+const titleEl = document.getElementById("page-title");
+if (titleEl) {
+  titleEl.textContent = `Библиотека аниме ${NICKNAME}`;
 }
 
 /* старт */

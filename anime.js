@@ -1,6 +1,8 @@
 const params = new URLSearchParams(location.search);
 const id = params.get("id");
-const user = "BcA9HuK";
+const NICKNAME = "BcA9HuK"; // должно совпадать с main.js
+const user = NICKNAME;
+const USER_AGENT = "AnimeLibrary/1.0"; // User-Agent для Shikimori API (требуется по документации)
 const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQZIa3uuVG-3ZjUWMPJLhnZ6xf0fMs0TabxYE3QRe2Thksz5ILHDv31A3qqJLIl4bZyYKYz5JJZfeK2/pub?gid=788506476&single=true&output=csv";
 let SHEET_CACHE = null; // { ready: Promise<Map> }
 
@@ -36,7 +38,7 @@ async function fetchGraphQL(query, variables = {}) {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "User-Agent": "MyAnimeT playground"
+      "User-Agent": USER_AGENT
     },
     body: JSON.stringify({ query, variables })
   });
@@ -220,7 +222,12 @@ async function loadRate(id) {
   let page = 1;
   while (true) {
     const res = await fetch(
-      `https://shikimori.one/api/users/${user}/anime_rates?limit=${LIMIT}&page=${page}`
+      `https://shikimori.one/api/users/${user}/anime_rates?limit=${LIMIT}&page=${page}`,
+      {
+        headers: {
+          "User-Agent": USER_AGENT
+        }
+      }
     );
     if (!res.ok) {
       console.warn("Failed to load rates page", page, res.status);
@@ -250,7 +257,11 @@ async function loadAnime() {
       4224: "https://shikimori.one/uploads/poster/animes/4224/main-52f8a82ffd8cb7d6ec1a7596435138c1.webp"
     };
 
-    const res = await fetch(`https://shikimori.one/api/animes/${id}`);
+    const res = await fetch(`https://shikimori.one/api/animes/${id}`, {
+      headers: {
+        "User-Agent": USER_AGENT
+      }
+    });
     const anime = await res.json();
 
     // базовые данные из REST
@@ -374,7 +385,7 @@ async function loadAnime() {
 
         <div>
           <span class="badge">⭐ ${anime.score}</span>
-          <span class="badge">Оценка BcA9HuK: ${userScore}</span>
+          <span class="badge">Оценка ${NICKNAME}: ${userScore}</span>
           <span class="badge">${type}</span>
           <span class="badge">${year}</span>
           <span class="badge">${anime.episodes} эп.</span>
