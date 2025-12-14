@@ -370,15 +370,27 @@ a.back:hover {
 }
 
 .tag.zakom {
-  background: #2a1f2b;
-  border: 1px solid #b46bcf;
-  color: #e8d8f3;
+  background: rgba(255, 107, 53, 0.15);
+  border: 1px solid rgba(255, 107, 53, 0.4);
+  color: #ff8c5a;
 }
 
 .tag.ongoing {
   background: #1f2d2a;
   border: 1px solid #4cd2a0;
   color: #d7f5e9;
+}
+
+.theme-light .tag.zakom {
+  background: rgba(255, 107, 53, 0.12);
+  border: 1px solid rgba(255, 107, 53, 0.35);
+  color: #d45a2a;
+}
+
+.theme-light .tag.ongoing {
+  background: #e0f5ed;
+  border: 1px solid #4cd2a0;
+  color: #0d6b47;
 }
 
 .info h3 {
