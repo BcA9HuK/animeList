@@ -3,6 +3,7 @@ const NICKNAME = "BcA9HuK"; //введите свой ник с Шикимори
 const USERNAME = NICKNAME; // для совместимости с API
 const LIMIT = 500; // Shikimori max per page
 const USER_AGENT = "AnimeLibrary/1.0"; // User-Agent для Shikimori API (требуется по документации)
+const CACHE_TTL = 60 * 60 * 1000; // Кэш на 1 час (в миллисекундах)
 
 const grid = document.getElementById("grid");
 const stats = document.getElementById("stats");
@@ -12,6 +13,7 @@ const sortSel = document.getElementById("sort");
 const reloadBtn = document.getElementById("reload");
 const empty = document.getElementById("empty");
 const themeBtn = document.getElementById("theme-toggle");
+const filterType = document.getElementById("filter-type");
 
 let ALL = []; // массив всех записей (rates)
 
@@ -36,8 +38,43 @@ function initTheme() {
   }
 }
 
+/* --- кэширование --- */
+function getCached(key) {
+  try {
+    const cached = localStorage.getItem(key);
+    if (!cached) return null;
+    const { value, timestamp } = JSON.parse(cached);
+    if (Date.now() - timestamp > CACHE_TTL) {
+      localStorage.removeItem(key);
+      return null;
+    }
+    return value;
+  } catch (e) {
+    return null;
+  }
+}
+
+function setCached(key, value) {
+  try {
+    localStorage.setItem(key, JSON.stringify({ value, timestamp: Date.now() }));
+  } catch (e) {
+    console.warn("Не удалось сохранить в кэш:", e);
+  }
+}
+
 /* --- загрузка всех страниц списка completed --- */
-async function loadAllRates(status = "completed") {
+async function loadAllRates(status = "completed", useCache = true) {
+  const cacheKey = `anime_list_${USERNAME}_${status}`;
+  
+  // Проверяем кэш
+  if (useCache) {
+    const cached = getCached(cacheKey);
+    if (cached) {
+      stats.textContent = `Загружено из кэша: ${cached.length} записей`;
+      return cached;
+    }
+  }
+
   let page = 1;
   let all = [];
 
@@ -62,6 +99,10 @@ async function loadAllRates(status = "completed") {
     if (data.length < LIMIT) break;
     page++;
   }
+  
+  // Сохраняем в кэш
+  setCached(cacheKey, all);
+  
   return all;
 }
 
@@ -171,17 +212,70 @@ function renderAll(list) {
   }
 
   const frag = document.createDocumentFragment();
-  for (const rate of list) {
-    frag.appendChild(renderCard(rate));
+  for (let i = 0; i < list.length; i++) {
+    const card = renderCard(list[i]);
+    // Добавляем задержку для каждой карточки для эффекта каскада
+    card.style.animationDelay = `${i * 0.03}s`;
+    frag.appendChild(card);
   }
   grid.appendChild(frag);
   stats.textContent = `Показано ${list.length} просмотренных тайтлов.`;
+}
+
+
+/* --- работа с URL параметрами --- */
+function updateURL() {
+  const params = new URLSearchParams();
+  
+  const q = qInput.value.trim();
+  if (q) params.set("q", q);
+  
+  const type = filterType.value;
+  if (type) params.set("type", type);
+  
+  const sort = sortSel.value;
+  if (sort && sort !== "date") params.set("sort", sort);
+  
+  const newURL = params.toString() 
+    ? `${window.location.pathname}?${params.toString()}`
+    : window.location.pathname;
+  
+  window.history.replaceState({}, "", newURL);
+}
+
+function loadFilters() {
+  // Сначала пробуем загрузить из sessionStorage (при возврате со страницы аниме)
+  const saved = sessionStorage.getItem("filters");
+  if (saved) {
+    try {
+      const filters = JSON.parse(saved);
+      if (filters.q) qInput.value = filters.q;
+      if (filters.type) filterType.value = filters.type;
+      if (filters.sort) sortSel.value = filters.sort;
+      return;
+    } catch (e) {
+      // Если не получилось, пробуем URL
+    }
+  }
+  
+  // Если нет в sessionStorage, пробуем URL
+  const params = new URLSearchParams(window.location.search);
+  
+  const q = params.get("q");
+  if (q) qInput.value = q;
+  
+  const type = params.get("type");
+  if (type) filterType.value = type;
+  
+  const sort = params.get("sort");
+  if (sort) sortSel.value = sort;
 }
 
 /* --- клиентская фильтрация и сортировка --- */
 function filterAndRender() {
   let filtered = ALL.slice();
 
+  // Поиск по названию
   const q = qInput.value.trim().toLowerCase();
   if (q) {
     filtered = filtered.filter(r => {
@@ -194,6 +288,15 @@ function filterAndRender() {
         ...(a.synonyms || [])
       ].join(" ").toLowerCase();
       return names.includes(q);
+    });
+  }
+
+  // Фильтр по типу
+  const typeFilter = filterType.value;
+  if (typeFilter) {
+    filtered = filtered.filter(r => {
+      const anime = r.anime || {};
+      return anime.kind && anime.kind.toLowerCase() === typeFilter.toLowerCase();
     });
   }
 
@@ -222,11 +325,25 @@ function filterAndRender() {
   });
 
   renderAll(filtered);
+  
+  // Обновляем URL
+  updateURL();
+  
+  // Сохраняем состояние фильтров в sessionStorage для восстановления при возврате
+  sessionStorage.setItem("filters", JSON.stringify({
+    q: qInput.value,
+    type: filterType.value,
+    sort: sortSel.value
+  }));
 }
 
 /* --- инициализация --- */
 async function init() {
   initTheme();
+  
+  // Загружаем состояние фильтров (из sessionStorage или URL)
+  loadFilters();
+  
   try {
     reloadBtn.disabled = true;
     ALL = await loadAllRates("completed");
@@ -242,7 +359,14 @@ async function init() {
 /* события UI */
 qInput.addEventListener("input", debounce(filterAndRender, 160));
 sortSel.addEventListener("change", filterAndRender);
-reloadBtn.addEventListener("click", () => { ALL = []; init(); });
+filterType.addEventListener("change", filterAndRender);
+reloadBtn.addEventListener("click", () => { 
+  ALL = []; 
+  // Очищаем кэш и загружаем заново
+  const cacheKey = `anime_list_${USERNAME}_completed`;
+  localStorage.removeItem(cacheKey);
+  init(); 
+});
 
 /* простая debounce */
 function debounce(fn, time = 150) {
