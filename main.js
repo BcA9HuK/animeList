@@ -338,11 +338,18 @@ function filterAndRender() {
 }
 
 /* --- инициализация --- */
-async function init() {
+async function init(resetFilters = false) {
   initTheme();
   
-  // Загружаем состояние фильтров (из sessionStorage или URL)
-  loadFilters();
+  // Загружаем состояние фильтров (из sessionStorage или URL), если не нужно сбрасывать
+  if (!resetFilters) {
+    loadFilters();
+  } else {
+    // Сбрасываем фильтры к значениям по умолчанию
+    qInput.value = "";
+    filterType.value = "";
+    sortSel.value = "date";
+  }
   
   try {
     reloadBtn.disabled = true;
@@ -362,10 +369,13 @@ sortSel.addEventListener("change", filterAndRender);
 filterType.addEventListener("change", filterAndRender);
 reloadBtn.addEventListener("click", () => { 
   ALL = []; 
+  // Очищаем сохранённые фильтры
+  sessionStorage.removeItem("filters");
   // Очищаем кэш и загружаем заново
   const cacheKey = `anime_list_${USERNAME}_completed`;
   localStorage.removeItem(cacheKey);
-  init(); 
+  // Передаём флаг для сброса фильтров
+  init(true); 
 });
 
 /* простая debounce */
