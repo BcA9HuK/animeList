@@ -194,7 +194,7 @@ function renderCard(rate) {
 
   // Оборачиваем карточку в ссылку, чтобы СКМ/ctrl+click открывали в новой вкладке
   const link = document.createElement("a");
-  link.href = `anime.html?id=${anime.id}`;
+  link.href = `anime/anime.html?id=${anime.id}`;
   link.className = "card-link";
   link.style.textDecoration = "none";
   link.style.display = "block";
@@ -399,6 +399,3 @@ if (titleEl) {
 
 /* старт */
 init();
-
-
-
