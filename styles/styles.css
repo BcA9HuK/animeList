@@ -257,6 +257,25 @@ a:not(.link):hover {
   margin-bottom: 12px;
   color: var(--muted);
   font-size: 13px;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.stats-item {
+  white-space: nowrap;
+}
+
+.stats-item strong {
+  color: var(--text-strong);
+  font-weight: 600;
+}
+
+.stats-separator {
+  color: var(--muted);
+  margin: 0 2px;
+  user-select: none;
 }
 
 /* ---------- Grid ---------- */

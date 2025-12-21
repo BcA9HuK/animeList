@@ -204,6 +204,38 @@ function renderCard(rate) {
   return link;
 }
 
+/* --- подсчёт статистики --- */
+function calculateStats(list) {
+  const stats = {
+    tv: 0,
+    movie: 0,
+    ova: 0,
+    ona: 0,
+    special: 0,
+    episodes: 0,
+    days: 0
+  };
+
+  list.forEach(rate => {
+    const anime = rate.anime || {};
+    const kind = anime.kind ? anime.kind.toLowerCase() : "";
+    const episodes = anime.episodes || 0;
+
+    if (kind === "tv") stats.tv++;
+    else if (kind === "movie") stats.movie++;
+    else if (kind === "ova") stats.ova++;
+    else if (kind === "ona") stats.ona++;
+    else if (kind === "special") stats.special++;
+
+    stats.episodes += episodes;
+  });
+
+  // Дни: средняя длительность эпизода ~24 минуты, значит 1 эпизод = 24/60/24 = 1/60 дня
+  stats.days = (stats.episodes / 60).toFixed(2);
+
+  return stats;
+}
+
 /* --- рендер всех карточек с фильтрами --- */
 function renderAll(list) {
   grid.innerHTML = "";
@@ -223,7 +255,24 @@ function renderAll(list) {
     frag.appendChild(card);
   }
   grid.appendChild(frag);
-  stats.textContent = `Показано ${list.length} просмотренных тайтлов.`;
+
+  // Показываем статистику
+  const statsData = calculateStats(list);
+  stats.innerHTML = `
+    <span class="stats-item"><strong>Сериалы:</strong> ${statsData.tv}</span>
+    <span class="stats-separator">/</span>
+    <span class="stats-item"><strong>Фильмы:</strong> ${statsData.movie}</span>
+    <span class="stats-separator">/</span>
+    <span class="stats-item"><strong>OVA:</strong> ${statsData.ova}</span>
+    <span class="stats-separator">/</span>
+    <span class="stats-item"><strong>ONA:</strong> ${statsData.ona}</span>
+    <span class="stats-separator">/</span>
+    <span class="stats-item"><strong>Спешлы:</strong> ${statsData.special}</span>
+    <span class="stats-separator">/</span>
+    <span class="stats-item"><strong>Эпизоды:</strong> ${statsData.episodes}</span>
+    <span class="stats-separator">/</span>
+    <span class="stats-item"><strong>Дни:</strong> ${statsData.days}</span>
+  `;
 }
 
 
@@ -400,4 +449,3 @@ if (titleEl) {
 
 /* старт */
 init();
-
