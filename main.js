@@ -212,8 +212,10 @@ function calculateStats(list) {
     ova: 0,
     ona: 0,
     special: 0,
+    tv_special: 0,
     episodes: 0,
-    days: 0
+    days: 0,
+    hours: 0
   };
 
   list.forEach(rate => {
@@ -226,12 +228,19 @@ function calculateStats(list) {
     else if (kind === "ova") stats.ova++;
     else if (kind === "ona") stats.ona++;
     else if (kind === "special") stats.special++;
+    else if (kind === "tv_special") {
+      stats.tv_special++;
+      stats.special++; // учитываем в общем числе спецвыпусков
+    }
 
     stats.episodes += episodes;
   });
 
-  // Дни: средняя длительность эпизода ~24 минуты, значит 1 эпизод = 24/60/24 = 1/60 дня
-  stats.days = (stats.episodes / 60).toFixed(2);
+  // Средняя длительность эпизода ~24 минуты.
+  // Часы: эпизоды * 24 / 60. Дни: часы / 24.
+  const hours = (stats.episodes * 24) / 60;
+  stats.hours = hours.toFixed(1);
+  stats.days = (hours / 24).toFixed(2);
 
   return stats;
 }
@@ -258,20 +267,30 @@ function renderAll(list) {
 
   // Показываем статистику
   const statsData = calculateStats(list);
+  const typeLabelMap = {
+    "": "Тайтлов",
+    tv: "Сериалов",
+    movie: "Фильмов",
+    ova: "OVA",
+    ona: "ONA",
+    special: "Спешлов",
+    tv_special: "TV Special"
+  };
+  const currentType = (filterType.value || "").toLowerCase();
+  const titleLabel = typeLabelMap[currentType] || "Тайтлов";
+  const totalTitles =
+    statsData.tv +
+    statsData.movie +
+    statsData.ova +
+    statsData.ona +
+    statsData.special;
+
   stats.innerHTML = `
-    <span class="stats-item"><strong>Сериалы:</strong> ${statsData.tv}</span>
+    <span class="stats-item"><strong>${titleLabel}:</strong> ${totalTitles}</span>
     <span class="stats-separator">/</span>
-    <span class="stats-item"><strong>Фильмы:</strong> ${statsData.movie}</span>
+    <span class="stats-item"><strong>Эпизодов:</strong> ${statsData.episodes}</span>
     <span class="stats-separator">/</span>
-    <span class="stats-item"><strong>OVA:</strong> ${statsData.ova}</span>
-    <span class="stats-separator">/</span>
-    <span class="stats-item"><strong>ONA:</strong> ${statsData.ona}</span>
-    <span class="stats-separator">/</span>
-    <span class="stats-item"><strong>Спешлы:</strong> ${statsData.special}</span>
-    <span class="stats-separator">/</span>
-    <span class="stats-item"><strong>Эпизоды:</strong> ${statsData.episodes}</span>
-    <span class="stats-separator">/</span>
-    <span class="stats-item"><strong>Дни:</strong> ${statsData.days}</span>
+    <span class="stats-item"><strong>Дней:</strong> ${statsData.days} <span class="stats-muted">(≈ ${statsData.hours} ч)</span></span>
   `;
 }
 

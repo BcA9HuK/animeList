@@ -272,6 +272,11 @@ a:not(.link):hover {
   font-weight: 600;
 }
 
+.stats-muted {
+  color: var(--muted);
+  font-weight: 400;
+}
+
 .stats-separator {
   color: var(--muted);
   margin: 0 2px;
