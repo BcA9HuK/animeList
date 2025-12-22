@@ -164,7 +164,12 @@ function renderCard(rate) {
     60619: "https://shikimori.one/uploads/poster/animes/60619/main-0a1f2b5fb65340e2f6bb9579b18f61c9.webp",
     59644: "https://shikimori.one/uploads/poster/animes/59644/main-abb74d6c0956759e417669fe33b4ced1.webp",
     61174: "https://shikimori.one/uploads/poster/animes/61174/main-e28b28c40be9722d5fc403be786e71de.webp",
-    60303: "https://shikimori.one/uploads/poster/animes/60303/main-30c61aff4385c15fcab29d79aad5e647.webp"
+    60303: "https://shikimori.one/uploads/poster/animes/60303/main-30c61aff4385c15fcab29d79aad5e647.webp",
+    61276: "https://shikimori.one/uploads/poster/animes/61276/main-35633873d27e797fe6303e7140559ae1.webp",
+    57888: "https://shikimori.one/uploads/poster/animes/57888/main-b29176b1cc19e70aebbe29d49aa42ee1.webp",
+    61209: "https://shikimori.one/uploads/poster/animes/61209/main-9dfb1984fae701a1158d794b586b9f27.webp",
+    59846: "https://shikimori.one/uploads/poster/animes/59846/main-6f620460756124c59037f51a4e843a4d.webp",
+    60531: "https://shikimori.one/uploads/poster/animes/60531/main-5eb5b0cd56d26db39b3f4ddec3b5d18b.webp"
   };
 
   // Выбор картинки: сначала ручной override, потом preview, потом original, иначе запасной
