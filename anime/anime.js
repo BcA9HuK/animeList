@@ -255,7 +255,8 @@ async function loadAnime() {
       54284: "https://shikimori.one/uploads/poster/animes/54284/main-e07db78ddc9e6b6d5c369bf258671dda.webp",
       52962: "https://shikimori.one/uploads/poster/animes/52962/main-ece812da3f560cc3d1ccf0d2ebaaaa3d.webp",
       4224: "https://shikimori.one/uploads/poster/animes/4224/main-52f8a82ffd8cb7d6ec1a7596435138c1.webp",
-      57888: "https://shikimori.one/uploads/poster/animes/57888/main-b29176b1cc19e70aebbe29d49aa42ee1.webp"
+      57888: "https://shikimori.one/uploads/poster/animes/57888/main-b29176b1cc19e70aebbe29d49aa42ee1.webp",
+      47158: "https://shikimori.one/uploads/poster/animes/47158/main-8efefd30614d183b9d66d7501e045d2f.webp"
     };
 
     const res = await fetch(`https://shikimori.one/api/animes/${id}`, {
