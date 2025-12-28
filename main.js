@@ -173,8 +173,7 @@ function renderCard(rate) {
     61026: "https://shikimori.one/uploads/poster/animes/61026/main-b40922096c5c15096ec70358c89fbd6b.webp",
     47158: "https://shikimori.one/uploads/poster/animes/47158/main-8efefd30614d183b9d66d7501e045d2f.webp",
     59957: "https://shikimori.one/uploads/poster/animes/59957/main-cf957b0cfaecfafceb4ce14cb6c49a29.webp",
-    60326: "https://shikimori.one/uploads/poster/animes/60326/main-5cd7e3ee6c28b6bd0c9512c530fe8d52.webp",
-    58146: "https://shikimori.one/uploads/poster/animes/58146/main-bdec98537a6666610f4f459131f8c798.webp"
+    60326: "https://shikimori.one/uploads/poster/animes/60326/main-5cd7e3ee6c28b6bd0c9512c530fe8d52.webp"
   };
 
   // Выбор картинки: сначала ручной override, потом preview, потом original, иначе запасной
@@ -478,4 +477,3 @@ if (titleEl) {
 
 /* старт */
 init();
-

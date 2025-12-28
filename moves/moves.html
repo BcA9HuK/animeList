@@ -3,39 +3,38 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Библиотека аниме</title>
-  <link rel="icon" href="assets/favicon.png" type="image/png" />
-  <link rel="stylesheet" href="styles/styles.css" />
+  <title>Библиотека фильмов/сериалов</title>
+  <link rel="icon" href="../assets/favicon.png" type="image/png" />
+  <link rel="stylesheet" href="../styles/styles.css" />
 </head>
 <body>
   <nav class="nav-tabs">
     <div class="nav-tabs-inner">
-      <a href="index.html" class="nav-tab nav-tab--active">Аниме</a>
-      <a href="manga/manga.html" class="nav-tab">Манга</a>
-      <a href="moves/moves.html" class="nav-tab">Фильмы/сериалы</a>
+      <a href="../index.html" class="nav-tab">Аниме</a>
+      <a href="../manga/manga.html" class="nav-tab">Манга</a>
+      <a href="moves.html" class="nav-tab nav-tab--active">Фильмы/сериалы</a>
       <button class="nav-tab nav-tab--disabled" type="button" disabled>Игры (скоро)</button>
     </div>
   </nav>
 
   <header class="top">
-    <h1 id="page-title">Библиотека аниме</h1>
+    <h1 id="page-title-manga">Библиотека фильмов/сериалов</h1>
     <div class="controls">
       <input id="q" type="search" placeholder="Поиск по названию..." />
       <select id="filter-type">
         <option value="">Все типы</option>
-        <option value="tv">TV</option>
-        <option value="movie">Movie</option>
-        <option value="ova">OVA</option>
-        <option value="ona">ONA</option>
-        <option value="special">Special</option>
+        <option value="Фильмы">Фильмы</option>
+        <option value="м/ф">Мультфильмы</option>
+        <option value="Сериалы">Сериалы</option>
+        <option value="Дорамы">Дорамы</option>
       </select>
-      <select id="sort"> <!--Сортировка selected для выбора по умолчанию-->
-        <option value="rate_desc">Оценка ↓</option>
-        <option value="rate_asc">Оценка ↑</option>
+      <select id="sort">
+        <option value="my_score_desc">Моя оценка ↓</option>
+        <option value="my_score_asc">Моя оценка ↑</option>
+        <option value="date_desc">Новые → старые</option>
+        <option value="date_asc" selected>Старые → новые</option>
         <option value="name_az">Название A→Z</option>
         <option value="name_za">Название Z→A</option>
-        <option value="date" selected>Новые → старые</option>
-        <option value="date_old">Старые → новые</option>
       </select>
       <button id="theme-toggle" class="theme-toggle">Светлая тема</button>
       <button id="reload">Обновить</button>
@@ -55,19 +54,20 @@
         <div class="title"></div>
         <div class="sub">
           <span class="type"></span>
+          <span class="chapters"></span>
           <span class="episodes"></span>
           <span class="year"></span>
         </div>
         <div class="score-row">
-          <span class="score">Оценка: —</span>
+          <span class="score">Моя оценка: —</span>
           <span class="rating">⭐ —</span>
         </div>
-        <div class="genres"></div>
       </div>
     </article>
   </template>
 
-  <script src="main.js"></script>
+  <script src="moves.js"></script>
 </body>
 </html>
+
 
