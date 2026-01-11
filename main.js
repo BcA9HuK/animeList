@@ -173,7 +173,14 @@ function renderCard(rate) {
     61026: "https://shikimori.one/uploads/poster/animes/61026/main-b40922096c5c15096ec70358c89fbd6b.webp",
     47158: "https://shikimori.one/uploads/poster/animes/47158/main-8efefd30614d183b9d66d7501e045d2f.webp",
     59957: "https://shikimori.one/uploads/poster/animes/59957/main-cf957b0cfaecfafceb4ce14cb6c49a29.webp",
-    60326: "https://shikimori.one/uploads/poster/animes/60326/main-5cd7e3ee6c28b6bd0c9512c530fe8d52.webp"
+    60326: "https://shikimori.one/uploads/poster/animes/60326/main-5cd7e3ee6c28b6bd0c9512c530fe8d52.webp",
+    58146: "https://shikimori.one/uploads/poster/animes/58146/ad6bd8bfad2ab0813ff41d62643238c4.jpeg",
+    56693: "https://shikimori.one/uploads/poster/animes/56693/c208406d4fd2b6b4bf222cdfa87a61fe.jpeg",
+    60162: "https://shikimori.one/uploads/poster/animes/60162/517c0721041a8f3d1573c91d02c36295.jpeg",
+    60168: "https://shikimori.one/uploads/poster/animes/60168/554595b59eb5bf14902c662d3b64cd34.jpeg",
+    59402: "https://shikimori.one/uploads/poster/animes/59402/93e78145c1133e98d2d307e974ee17bc.jpeg",
+    59062: "https://avatars.mds.yandex.net/get-kinopoisk-image/10809116/978904f6-0f44-4a6f-8081-84eab2a8252c/orig",
+    58772: "https://shikimori.one/uploads/poster/animes/58772/84197f3932f919ea9a4527f606cea53c.jpeg"
   };
 
   // Выбор картинки: сначала ручной override, потом preview, потом original, иначе запасной
