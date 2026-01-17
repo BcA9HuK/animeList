@@ -15,7 +15,11 @@ function applyTheme(theme) {
 // Уникальный ключ темы на основе пути страницы
 function getThemeKey() {
   const path = window.location.pathname;
-  // Извлекаем имя проекта из пути (например, /animeList/ -> animeList)
+  // Для animeList всегда используем 'animeList' независимо от подпапки
+  if (path.includes('/animeList')) {
+    return 'theme-animeList';
+  }
+  // Для других проектов извлекаем имя из пути
   const match = path.match(/\/([^\/]+)/);
   const projectName = match ? match[1] : 'default';
   return `theme-${projectName}`;

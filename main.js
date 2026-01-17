@@ -30,8 +30,14 @@ function applyTheme(theme) {
 function getThemeKey() {
   const path = window.location.pathname;
   // Извлекаем имя проекта из пути (например, /animeList/ -> animeList)
+  // Ищем первый сегмент пути, который не является просто файлом
   const match = path.match(/\/([^\/]+)/);
   const projectName = match ? match[1] : 'default';
+  // Убираем расширение файла, если есть (например, index.html -> index, но это не нужно)
+  // Для animeList всегда используем 'animeList' независимо от подпапки
+  if (projectName === 'animeList' || path.includes('/animeList')) {
+    return 'theme-animeList';
+  }
   return `theme-${projectName}`;
 }
 
