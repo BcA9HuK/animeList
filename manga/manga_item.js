@@ -11,7 +11,17 @@ function applyTheme(theme) {
   document.documentElement.classList.toggle("theme-light", isLight);
 }
 
-applyTheme(localStorage.getItem("theme") === "light" ? "light" : "dark");
+// Уникальный ключ темы на основе пути страницы
+function getThemeKey() {
+  const path = window.location.pathname;
+  // Извлекаем имя проекта из пути (например, /animeList/ -> animeList)
+  const match = path.match(/\/([^\/]+)/);
+  const projectName = match ? match[1] : 'default';
+  return `theme-${projectName}`;
+}
+
+const themeKey = getThemeKey();
+applyTheme(localStorage.getItem(themeKey) === "light" ? "light" : "dark");
 
 /* --- CSV-парсер (упрощённая версия из manga.js) --- */
 function parseCsv(text) {

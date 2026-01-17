@@ -12,8 +12,18 @@ function applyTheme(theme) {
   document.documentElement.classList.toggle("theme-light", isLight);
 }
 
+// Уникальный ключ темы на основе пути страницы
+function getThemeKey() {
+  const path = window.location.pathname;
+  // Извлекаем имя проекта из пути (например, /animeList/ -> animeList)
+  const match = path.match(/\/([^\/]+)/);
+  const projectName = match ? match[1] : 'default';
+  return `theme-${projectName}`;
+}
+
 // применяем сразу сохранённую тему, чтобы не мигало
-applyTheme(localStorage.getItem("theme") === "light" ? "light" : "dark");
+const themeKey = getThemeKey();
+applyTheme(localStorage.getItem(themeKey) === "light" ? "light" : "dark");
 
 function isShikiPlaceholderPath(pathOrUrl) {
   return typeof pathOrUrl === "string" && pathOrUrl.includes("/assets/globals/missing_original");

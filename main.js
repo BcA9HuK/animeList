@@ -26,15 +26,32 @@ function applyTheme(theme) {
   }
 }
 
+// Уникальный ключ темы на основе пути страницы
+function getThemeKey() {
+  const path = window.location.pathname;
+  // Извлекаем имя проекта из пути (например, /animeList/ -> animeList)
+  const match = path.match(/\/([^\/]+)/);
+  const projectName = match ? match[1] : 'default';
+  return `theme-${projectName}`;
+}
+
+// Обработчик переключения темы (вынесен отдельно, чтобы можно было удалить)
+function handleThemeToggle() {
+  const themeKey = getThemeKey();
+  const next = document.documentElement.classList.contains("theme-light") ? "dark" : "light";
+  localStorage.setItem(themeKey, next);
+  applyTheme(next);
+}
+
 function initTheme() {
-  const saved = localStorage.getItem("theme") === "light" ? "light" : "dark";
+  const themeKey = getThemeKey();
+  const saved = localStorage.getItem(themeKey) === "light" ? "light" : "dark";
   applyTheme(saved);
   if (themeBtn) {
-    themeBtn.addEventListener("click", () => {
-      const next = document.documentElement.classList.contains("theme-light") ? "dark" : "light";
-      localStorage.setItem("theme", next);
-      applyTheme(next);
-    });
+    // Удаляем старый обработчик, если он был добавлен
+    themeBtn.removeEventListener("click", handleThemeToggle);
+    // Добавляем новый обработчик
+    themeBtn.addEventListener("click", handleThemeToggle);
   }
 }
 
