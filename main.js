@@ -62,6 +62,125 @@ function setCached(key, value) {
   }
 }
 
+/* --- загрузка постеров из Google Sheets --- */
+const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQZIa3uuVG-3ZjUWMPJLhnZ6xf0fMs0TabxYE3QRe2Thksz5ILHDv31A3qqJLIl4bZyYKYz5JJZfeK2/pub?gid=788506476&single=true&output=csv";
+let POSTER_OVERRIDES_CACHE = null;
+
+function normalizeHeader(cell) {
+  return cell.replace(/\s+/g, " ").trim().toLowerCase();
+}
+
+// Простой CSV-парсер
+function parseCsv(text) {
+  const rows = [];
+  let row = [];
+  let cell = "";
+  let inQuotes = false;
+
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    const next = text[i + 1];
+
+    if (ch === '"') {
+      if (inQuotes && next === '"') {
+        cell += '"';
+        i++;
+      } else {
+        inQuotes = !inQuotes;
+      }
+      continue;
+    }
+
+    if (ch === "," && !inQuotes) {
+      row.push(cell);
+      cell = "";
+      continue;
+    }
+
+    if ((ch === "\n" || ch === "\r") && !inQuotes) {
+      if (cell.length || row.length) {
+        row.push(cell);
+        rows.push(row);
+        row = [];
+        cell = "";
+      }
+      continue;
+    }
+
+    cell += ch;
+  }
+
+  if (cell.length || row.length) {
+    row.push(cell);
+    rows.push(row);
+  }
+  return rows;
+}
+
+async function loadPosterOverrides() {
+  if (POSTER_OVERRIDES_CACHE) return POSTER_OVERRIDES_CACHE;
+  
+  const cacheKey = "poster_overrides";
+  if (getCached(cacheKey)) {
+    POSTER_OVERRIDES_CACHE = getCached(cacheKey);
+    return POSTER_OVERRIDES_CACHE;
+  }
+
+  try {
+    const res = await fetch(`${SHEET_CSV_URL}&cachebust=${Math.floor(Date.now() / 60000)}`);
+    const text = await res.text();
+    const rows = parseCsv(text);
+    if (!rows.length) {
+      POSTER_OVERRIDES_CACHE = {};
+      return {};
+    }
+
+    let header = null;
+    let headerIdx = -1;
+    for (let i = 0; i < rows.length; i++) {
+      const candidate = rows[i].map(normalizeHeader);
+      if (candidate.some(c => c.includes("id"))) {
+        header = candidate;
+        headerIdx = i;
+        break;
+      }
+    }
+    if (!header) {
+      POSTER_OVERRIDES_CACHE = {};
+      return {};
+    }
+
+    const idIdx = header.findIndex(c => c.includes("id"));
+    const posterIdx = header.findIndex(c => {
+      const normalized = c.toLowerCase().trim();
+      return normalized === "poster" || normalized === "постер" || normalized.includes("poster") || normalized.includes("постер");
+    });
+
+    const overrides = {};
+    for (let i = headerIdx + 1; i < rows.length; i++) {
+      const row = rows[i];
+      if (!row || !row.length) continue;
+      const rawId = (row[idIdx] || "").trim();
+      if (!rawId || rawId === "-") continue;
+      const numId = Number(rawId);
+      if (!Number.isFinite(numId)) continue;
+
+      const poster = (row[posterIdx] || "").trim();
+      if (poster && poster !== "-") {
+        overrides[numId] = poster;
+      }
+    }
+
+    POSTER_OVERRIDES_CACHE = overrides;
+    setCached(cacheKey, overrides);
+    return overrides;
+  } catch (e) {
+    console.warn("Не удалось загрузить постеры из таблицы", e);
+    POSTER_OVERRIDES_CACHE = {};
+    return {};
+  }
+}
+
 /* --- загрузка всех страниц списка completed --- */
 async function loadAllRates(status = "completed", useCache = true) {
   const cacheKey = `anime_list_${USERNAME}_${status}`;
@@ -107,7 +226,7 @@ async function loadAllRates(status = "completed", useCache = true) {
 }
 
 /* --- создатель карточки --- */
-function renderCard(rate) {
+function renderCardWithOverrides(rate, POSTER_OVERRIDES) {
   const anime = rate.anime || {};
   const node = tpl.content.cloneNode(true);
   const el = node.querySelector(".card");
@@ -119,69 +238,6 @@ function renderCard(rate) {
   const score = node.querySelector(".score");
   const rating = node.querySelector(".rating");
   const genres = node.querySelector(".genres");
-
-  // Ручные исправления постеров: ключ — ID аниме на Shikimori
-  const POSTER_OVERRIDES = {
-    59986: "https://shikimori.one/uploads/poster/animes/59986/main-f58f92d4adc6e336d2cce149dcaaedac.webp",
-    56907: "https://shikimori.one/uploads/poster/animes/56907/d440571f2132e74a76781ca457187c79.jpeg",
-    60316: "https://shikimori.one/uploads/poster/animes/60316/main-4559dac7743c844ae22693303dad9138.webp",
-    48962: "https://shikimori.one/uploads/poster/animes/48962/main-70c6648952fb23b1014a6888b5965c8f.webp",
-    56774: "https://shikimori.one/uploads/poster/animes/56774/main-126444114f0f3478ae877707750fccd2.webp",
-    55791: "https://shikimori.one/uploads/poster/animes/55791/main-bab756dc3eebe56bcc3aea2107cb41ec.webp",
-    59177: "https://shikimori.one/uploads/poster/animes/59177/main-cd1cb38425ef4df60290cbbc830ab9df.webp",
-    59207: "https://shikimori.one/uploads/poster/animes/59207/main-7e64f4351625d3bfc7958d7d6f72a5af.webp",
-    59424: "https://shikimori.one/uploads/poster/animes/59424/d2c95cfc56e448c1bd68440c06fb54fe.jpeg",
-    59205: "https://shikimori.one/uploads/poster/animes/59205/main-f8ec893f79ecfba886870acdc377dbbd.webp",
-    60732: "https://shikimori.one/uploads/poster/animes/60732/main-05f8937b01b938b1f14ed41bc2c469f6.webp",
-    59459: "https://shikimori.one/uploads/poster/animes/59459/main-475fc0a1a4aeeb790a2642c82750bd6c.webp",
-    59421: "https://shikimori.one/uploads/poster/animes/59421/main-562853c0a2b44d0a4fed405e1ac119b7.webp",
-    59845: "https://shikimori.one/uploads/poster/animes/59845/main-158d7102f71b7cedd6a23c22265dafa9.webp",
-    59161: "https://shikimori.one/uploads/poster/animes/59161/main-10955fa4fb5153f7b5482a3a353cd8a1.webp",
-    59130: "https://shikimori.one/uploads/poster/animes/59130/main-f2eb412e9b0bcacc9ebccf2bdebe1139.webp",
-    59689: "https://shikimori.one/uploads/poster/animes/59689/main-ed4053f1f36c22a2dc7607a3864a0848.webp",
-    59730: "https://shikimori.one/uploads/poster/animes/59730/main-b891bd01c179cf0d99c59176cf7638b9.webp",
-    59935: "https://shikimori.one/uploads/poster/animes/59935/main-134a34f5bac2cbc357a78d68dd36de7b.webp",
-    60146: "https://shikimori.one/uploads/poster/animes/60146/main-345827ea2f19b6a6086e3cef23d15e10.webp",
-    52709: "https://shikimori.one/uploads/poster/animes/52709/main-bd54103165cb7ce8486939e8328a236e.webp",
-    59452: "https://shikimori.one/uploads/poster/animes/59452/main-c870f2442e42aa5f14ce870441d15028.webp",
-    60154: "https://shikimori.one/uploads/poster/animes/60154/main-10c374e2059ff9a765ef881ab4455192.webp",
-    60140: "https://shikimori.one/uploads/poster/animes/60140/main-da656b440471b8bbd0bd44f333137b22.webp",
-    59466: "https://shikimori.one/uploads/poster/animes/59466/main-abfce312483cae752e75ed2255b3237a.webp",
-    60157: "https://shikimori.one/uploads/poster/animes/60157/main-3c439cb413d8282b49de36b000a11db0.webp",
-    59833: "https://shikimori.one/uploads/poster/animes/59833/main-8d1635d8192e7bc53cf474c3152efe75.webp",
-    60057: "https://shikimori.one/uploads/poster/animes/60057/main-1ccd7d70a5a353a53f2b12e8ea4e5046.webp",
-    59425: "https://shikimori.one/uploads/poster/animes/59425/main-13fb5d686fa8c99e0b589a38fa10e9e0.webp",
-    59989: "https://shikimori.one/uploads/poster/animes/59989/main-3dfe610aaa59cd0f41bcda9ff7f24d2a.webp",
-    59135: "https://shikimori.one/uploads/poster/animes/59135/main-f60d52781936b927ee548c727fbfd9b2.webp",
-    59361: "https://shikimori.one/uploads/poster/animes/59361/main-f330fa9f3cae8798a9b6693867c0ef14.webp",
-    59142: "https://shikimori.one/uploads/poster/animes/59142/main-812b26da142e14eab7216dcee4d8aedb.webp",
-    59265: "https://shikimori.one/uploads/poster/animes/59265/main-0e95eed8869ad78613cbcc7ff538ea17.webp",
-    59561: "https://shikimori.one/uploads/poster/animes/59561/main-fd8ec565477ffccd6dbcbbfb06f206d0.webp",
-    59144: "https://shikimori.one/uploads/poster/animes/59144/main-66e5d6594fbd1e9eb61746f7bc7fc59c.webp",
-    54284: "https://shikimori.one/uploads/poster/animes/54284/main-e07db78ddc9e6b6d5c369bf258671dda.webp",
-    52962: "https://shikimori.one/uploads/poster/animes/52962/main-ece812da3f560cc3d1ccf0d2ebaaaa3d.webp",
-    4224: "https://shikimori.one/uploads/poster/animes/4224/main-52f8a82ffd8cb7d6ec1a7596435138c1.webp",
-    60619: "https://shikimori.one/uploads/poster/animes/60619/main-0a1f2b5fb65340e2f6bb9579b18f61c9.webp",
-    59644: "https://shikimori.one/uploads/poster/animes/59644/main-abb74d6c0956759e417669fe33b4ced1.webp",
-    61174: "https://shikimori.one/uploads/poster/animes/61174/main-e28b28c40be9722d5fc403be786e71de.webp",
-    60303: "https://shikimori.one/uploads/poster/animes/60303/main-30c61aff4385c15fcab29d79aad5e647.webp",
-    61276: "https://shikimori.one/uploads/poster/animes/61276/main-35633873d27e797fe6303e7140559ae1.webp",
-    57888: "https://shikimori.one/uploads/poster/animes/57888/main-b29176b1cc19e70aebbe29d49aa42ee1.webp",
-    61209: "https://shikimori.one/uploads/poster/animes/61209/main-9dfb1984fae701a1158d794b586b9f27.webp",
-    59846: "https://shikimori.one/uploads/poster/animes/59846/main-6f620460756124c59037f51a4e843a4d.webp",
-    60531: "https://shikimori.one/uploads/poster/animes/60531/main-5eb5b0cd56d26db39b3f4ddec3b5d18b.webp",
-    61026: "https://shikimori.one/uploads/poster/animes/61026/main-b40922096c5c15096ec70358c89fbd6b.webp",
-    47158: "https://shikimori.one/uploads/poster/animes/47158/main-8efefd30614d183b9d66d7501e045d2f.webp",
-    59957: "https://shikimori.one/uploads/poster/animes/59957/main-cf957b0cfaecfafceb4ce14cb6c49a29.webp",
-    60326: "https://shikimori.one/uploads/poster/animes/60326/main-5cd7e3ee6c28b6bd0c9512c530fe8d52.webp",
-    58146: "https://shikimori.one/uploads/poster/animes/58146/ad6bd8bfad2ab0813ff41d62643238c4.jpeg",
-    56693: "https://shikimori.one/uploads/poster/animes/56693/c208406d4fd2b6b4bf222cdfa87a61fe.jpeg",
-    60162: "https://shikimori.one/uploads/poster/animes/60162/517c0721041a8f3d1573c91d02c36295.jpeg",
-    60168: "https://shikimori.one/uploads/poster/animes/60168/554595b59eb5bf14902c662d3b64cd34.jpeg",
-    59402: "https://shikimori.one/uploads/poster/animes/59402/93e78145c1133e98d2d307e974ee17bc.jpeg",
-    59062: "https://avatars.mds.yandex.net/get-kinopoisk-image/10809116/978904f6-0f44-4a6f-8081-84eab2a8252c/orig",
-    58772: "https://shikimori.one/uploads/poster/animes/58772/84197f3932f919ea9a4527f606cea53c.jpeg"
-  };
 
   // Выбор картинки: сначала ручной override, потом preview, потом original, иначе запасной
   const override = POSTER_OVERRIDES[anime.id];
@@ -262,7 +318,7 @@ function calculateStats(list) {
 }
 
 /* --- рендер всех карточек с фильтрами --- */
-function renderAll(list) {
+async function renderAll(list) {
   grid.innerHTML = "";
   if (!list.length) {
     empty.hidden = false;
@@ -273,8 +329,11 @@ function renderAll(list) {
   }
 
   const frag = document.createDocumentFragment();
+  // Загружаем постеры один раз для всех карточек
+  const POSTER_OVERRIDES = await loadPosterOverrides();
+  
   for (let i = 0; i < list.length; i++) {
-    const card = renderCard(list[i]);
+    const card = renderCardWithOverrides(list[i], POSTER_OVERRIDES);
     // Добавляем задержку для каждой карточки для эффекта каскада
     card.style.animationDelay = `${i * 0.03}s`;
     frag.appendChild(card);
@@ -360,7 +419,7 @@ function loadFilters() {
 }
 
 /* --- клиентская фильтрация и сортировка --- */
-function filterAndRender() {
+async function filterAndRender() {
   let filtered = ALL.slice();
 
   // Поиск по названию
@@ -412,7 +471,7 @@ function filterAndRender() {
     return 0;
   });
 
-  renderAll(filtered);
+  await renderAll(filtered);
   
   // Обновляем URL
   updateURL();
@@ -462,6 +521,9 @@ reloadBtn.addEventListener("click", () => {
   // Очищаем кэш и загружаем заново
   const cacheKey = `anime_list_${USERNAME}_completed`;
   localStorage.removeItem(cacheKey);
+  // Очищаем кэш постеров
+  localStorage.removeItem("poster_overrides");
+  POSTER_OVERRIDES_CACHE = null;
   // Передаём флаг для сброса фильтров
   init(true); 
 });

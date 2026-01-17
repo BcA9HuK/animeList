@@ -169,6 +169,7 @@ async function loadSheetMap() {
       const dateIdx = header.findIndex(c => c.includes("дата"));
       const voiceIdx = header.findIndex(c => c.includes("озвучк"));
       const zakomIdx = header.findIndex(c => c.includes("коммент"));
+      const posterIdx = header.findIndex(c => c.includes("poster") || c.includes("постер"));
 
       const map = new Map();
       for (let i = headerIdx + 1; i < rows.length; i++) {
@@ -189,6 +190,7 @@ async function loadSheetMap() {
         const date = norm(row[dateIdx]);
         const voice = norm(row[voiceIdx]);
         const zakomRaw = norm(row[zakomIdx]);
+        const poster = norm(row[posterIdx]);
         const hasZakom = zakomRaw ? /с\s*заком/i.test(zakomRaw) : false;
         // Онгоинг: ищем слово по всей строке (в т.ч. "Зима 24 (онгоинг)")
         const hasOngoing = row.some(cell => /онгоинг/i.test(cell || ""));
@@ -198,7 +200,8 @@ async function loadSheetMap() {
           date,
           voice,
           zakom: hasZakom,
-          ongoing: hasOngoing
+          ongoing: hasOngoing,
+          poster
         });
       }
       return map;
@@ -214,6 +217,23 @@ async function loadSheetMap() {
 async function getCustomData(shikiId) {
   const map = await loadSheetMap();
   return map.get(String(shikiId)) || null;
+}
+
+async function loadPosterOverrides() {
+  // Загружаем постеры из таблицы Google Sheets
+  try {
+    const sheetMap = await loadSheetMap();
+    const overrides = {};
+    sheetMap.forEach((data, id) => {
+      if (data.poster) {
+        overrides[Number(id)] = data.poster;
+      }
+    });
+    return overrides;
+  } catch (e) {
+    console.warn("Не удалось загрузить постеры из таблицы", e);
+    return {};
+  }
 }
 
 // Поддержка больших списков: пагинируем по 500 элементов, пока не найдём запись
@@ -243,26 +263,13 @@ async function loadRate(id) {
 }
 
 async function loadAnime() {
-    // Ручные постеры для страницы тайтла (id -> URL), если нужно принудительно заменить
-    const POSTER_OVERRIDES = {
-      // Пример: 59986: "https://shikimori.one/uploads/poster/animes/59986/main-f58f92d4adc6e336d2cce149dcaaedac.webp",
-      56907: "https://shikimori.one/uploads/poster/animes/56907/d440571f2132e74a76781ca457187c79.jpeg",
-      48962: "https://shikimori.one/uploads/poster/animes/48962/main-70c6648952fb23b1014a6888b5965c8f.webp",
-      56774: "https://shikimori.one/uploads/poster/animes/56774/main-126444114f0f3478ae877707750fccd2.webp",
-      55791: "https://shikimori.one/uploads/poster/animes/55791/main-bab756dc3eebe56bcc3aea2107cb41ec.webp",
-      59424: "https://shikimori.one/uploads/poster/animes/59424/d2c95cfc56e448c1bd68440c06fb54fe.jpeg",
-      52709: "https://shikimori.one/uploads/poster/animes/52709/main-bd54103165cb7ce8486939e8328a236e.webp",
-      54284: "https://shikimori.one/uploads/poster/animes/54284/main-e07db78ddc9e6b6d5c369bf258671dda.webp",
-      52962: "https://shikimori.one/uploads/poster/animes/52962/main-ece812da3f560cc3d1ccf0d2ebaaaa3d.webp",
-      4224: "https://shikimori.one/uploads/poster/animes/4224/main-52f8a82ffd8cb7d6ec1a7596435138c1.webp",
-      57888: "https://shikimori.one/uploads/poster/animes/57888/main-b29176b1cc19e70aebbe29d49aa42ee1.webp",
-      47158: "https://shikimori.one/uploads/poster/animes/47158/main-8efefd30614d183b9d66d7501e045d2f.webp",
-      58146: "https://shikimori.one/uploads/poster/animes/58146/ad6bd8bfad2ab0813ff41d62643238c4.jpeg",
-      56693: "https://shikimori.one/uploads/poster/animes/56693/c208406d4fd2b6b4bf222cdfa87a61fe.jpeg",
-      59062: "https://avatars.mds.yandex.net/get-kinopoisk-image/10809116/978904f6-0f44-4a6f-8081-84eab2a8252c/orig",
-      58772: "https://shikimori.one/uploads/poster/animes/58772/84197f3932f919ea9a4527f606cea53c.jpeg"
-    };
-
+    // Загружаем постеры из таблицы параллельно с основными данными
+    const [rate, custom, POSTER_OVERRIDES] = await Promise.all([
+      loadRate(id), 
+      getCustomData(id), 
+      loadPosterOverrides()
+    ]);
+    
     const res = await fetch(`https://shikimori.one/api/animes/${id}`, {
       headers: {
         "User-Agent": USER_AGENT
@@ -305,7 +312,6 @@ async function loadAnime() {
       videos = anime.videos;
     }
 
-    const [rate, custom] = await Promise.all([loadRate(id), getCustomData(id)]);
     const userScore = rate ? rate.score : "—";
     let customBlocks = "";
     if (custom) {
