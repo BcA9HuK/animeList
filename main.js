@@ -222,7 +222,7 @@ async function loadAllRates(status = "completed", useCache = true) {
 
   stats.textContent = "Подгружаю список с Shikimori...";
   while (true) {
-    const url = `https://shikimori.one/api/users/${USERNAME}/anime_rates?status=${status}&limit=${LIMIT}&page=${page}`;
+    const url = `https://shiki.one/api/users/${USERNAME}/anime_rates?status=${status}&limit=${LIMIT}&page=${page}`;
     const res = await fetch(url, {
       headers: {
         "User-Agent": USER_AGENT
@@ -264,8 +264,8 @@ function renderCardWithOverrides(rate, POSTER_OVERRIDES) {
 
   // Выбор картинки: сначала ручной override, потом preview, потом original, иначе запасной
   const override = POSTER_OVERRIDES[anime.id];
-  const imgPreview = anime.image?.preview ? `https://shikimori.one${anime.image.preview}` : null;
-  const imgOrig = anime.image?.original ? `https://shikimori.one${anime.image.original}` : null;
+  const imgPreview = anime.image?.preview ? `https://shiki.one${anime.image.preview}` : null;
+  const imgOrig = anime.image?.original ? `https://shiki.one${anime.image.original}` : null;
 
   const placeholder = `data:image/svg+xml;utf8,${encodeURIComponent(
     `<svg xmlns='http://www.w3.org/2000/svg' width='400' height='600'>
@@ -569,3 +569,4 @@ if (titleEl) {
 
 /* старт */
 init();
+
