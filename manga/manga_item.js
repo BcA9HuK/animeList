@@ -154,7 +154,7 @@ async function loadMangaRow(rowIndex) {
 async function loadDescriptionFromShiki(id) {
   if (!id) return null;
   try {
-    const res = await fetch(`https://shikimori.one/api/mangas/${id}`, {
+    const res = await fetch(`https://shiki.one/api/mangas/${id}`, {
       headers: {
         "User-Agent": USER_AGENT
       }
@@ -237,7 +237,7 @@ function renderMangaPage(item, descriptionHtml) {
     <div class="info">
       <div class="top-actions">
         <a class="back back-in-actions" href="manga.html">← Назад</a>
-        ${item.idShiki ? `<a class="link" href="https://shikimori.one/mangas/${item.idShiki}" target="_blank" rel="noopener">Открыть на Shikimori</a>` : ""}
+        ${item.idShiki ? `<a class="link" href="https://shiki.one/mangas/${item.idShiki}" target="_blank" rel="noopener">Открыть на Shikimori</a>` : ""}
         ${item.animeAdaptId ? `<a class="link" href="../anime/anime.html?id=${item.animeAdaptId}" target="_blank" rel="noopener">Аниме‑адаптация</a>` : ""}
       </div>
 
@@ -285,5 +285,6 @@ async function initMangaItem() {
 document.title = `Манга — ${NICKNAME}`;
 
 initMangaItem();
+
 
 
