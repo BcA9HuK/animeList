@@ -48,7 +48,7 @@ function getYouTubeId(url) {
 }
 
 async function fetchGraphQL(query, variables = {}) {
-  const res = await fetch("https://shikimori.one/api/graphql", {
+  const res = await fetch("https://shiki.one/api/graphql", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -256,7 +256,7 @@ async function loadRate(id) {
   let page = 1;
   while (true) {
     const res = await fetch(
-      `https://shikimori.one/api/users/${user}/anime_rates?limit=${LIMIT}&page=${page}`,
+      `https://shiki.one/api/users/${user}/anime_rates?limit=${LIMIT}&page=${page}`,
       {
         headers: {
           "User-Agent": USER_AGENT
@@ -284,7 +284,7 @@ async function loadAnime() {
       loadPosterOverrides()
     ]);
     
-    const res = await fetch(`https://shikimori.one/api/animes/${id}`, {
+    const res = await fetch(`https://shiki.one/api/animes/${id}`, {
       headers: {
         "User-Agent": USER_AGENT
       }
@@ -292,7 +292,7 @@ async function loadAnime() {
     const anime = await res.json();
 
     // базовые данные из REST
-    let posterUrl = POSTER_OVERRIDES[anime.id] || (anime.image?.original ? `https://shikimori.one${anime.image.original}` : null);
+    let posterUrl = POSTER_OVERRIDES[anime.id] || (anime.image?.original ? `https://shiki.one${anime.image.original}` : null);
     let restGenres = Array.isArray(anime.genres) ? anime.genres : [];
     let restStudios = Array.isArray(anime.studios) ? anime.studios : [];
 
@@ -398,7 +398,7 @@ async function loadAnime() {
       <div class="info">
         <div class="top-actions">
           <a class="back back-in-actions" href="../index.html">← Назад</a>
-          <a class="link" href="https://shikimori.one/animes/${anime.id}" target="_blank" rel="noopener">
+          <a class="link" href="https://shiki.one/animes/${anime.id}" target="_blank" rel="noopener">
             Открыть на Shikimori
           </a>
           <a class="link" href="https://reyohoho-gitlab.vercel.app/#shiki${anime.id}" target="_blank" rel="noopener">
@@ -495,4 +495,5 @@ async function loadAnime() {
 }
 
 loadAnime();
+
 
