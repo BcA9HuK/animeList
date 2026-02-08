@@ -401,9 +401,9 @@ async function loadAnime() {
           <a class="link" href="https://shiki.one/animes/${anime.id}" target="_blank" rel="noopener">
             Открыть на Shikimori
           </a>
-          <a class="link" href="https://reyohoho-gitlab.vercel.app/#shiki${anime.id}" target="_blank" rel="noopener">
+          <!-- <a class="link" href="https://reyohoho-gitlab.vercel.app/#shiki${anime.id}" target="_blank" rel="noopener">
             ▶ Смотреть на Reyohoho
-          </a>
+          </a> -->
         </div>
 
         <h1>${anime.russian || anime.name}</h1>
@@ -495,5 +495,6 @@ async function loadAnime() {
 }
 
 loadAnime();
+
 
 
