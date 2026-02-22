@@ -238,7 +238,7 @@ async function loadMangaFromSheet(useCache = true) {
 async function loadDescriptionFromShiki(id) {
   if (!id) return null;
   try {
-    const res = await fetch(`https://shiki.one/api/mangas/${id}`, {
+    const res = await fetch(`https://shikimori.io/api/mangas/${id}`, {
       headers: {
         "User-Agent": USER_AGENT
       }
@@ -414,6 +414,7 @@ if (titleManga) {
 }
 
 init();
+
 
 
 
